@@ -13,6 +13,7 @@ import {
   normalizeConsoleHeaders,
   validateStatus,
 } from './console-fetch-utils';
+import { updateLastConsoleActivity } from './activity-tracker';
 
 const defaultRequestOptions: RequestInit = {
   headers: {},
@@ -36,6 +37,9 @@ export const coFetch: ConsoleFetch = async (url, options = {}, timeout = 60000) 
         res = await fetch(url, allOptions).then((resp) =>
           validateStatus(resp, url, allOptions.method, attempt < 3),
         );
+        // Update activity timestamp on successful API requests
+        // This keeps the inactivity timer in sync with actual API activity
+        updateLastConsoleActivity();
       } catch (e) {
         if (e instanceof RetryError) {
           retry = true;
